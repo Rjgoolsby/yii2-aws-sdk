@@ -8,6 +8,7 @@
 namespace fedemotta\awssdk;
 use yii\base\Component;
 use Aws;
+use Aws\S3\S3Client;
 
 /**
  * Yii2 component wrapping of the AWS SDK for easy configuration
@@ -34,11 +35,22 @@ class AwsSdk extends Component
      * @var array specifies extra params
      */
     public $extra = [];
+
+    protected $options;
     
     /**
      * @var AWS SDK instance
      */
     protected $_awssdk;
+
+    public function init(){
+        $this->options = array_merge([ 
+            'credentials' => $this->credentials,
+            'region'=>$this->region,
+            'version'=>$this->version
+        ],$this->extra);
+        parent::init();
+    }
     
     /**
      * Initializes (if needed) and fetches the AWS SDK instance
@@ -56,10 +68,10 @@ class AwsSdk extends Component
      */
     public function setAwsSdk()
     {
-        $this->_awssdk = new Aws\Sdk(array_merge([ 
-                                        'credentials' => $this->credentials,
-                                        'region'=>$this->region,
-                                        'version'=>$this->version
-                                    ],$this->extra));
+        $this->_awssdk = new Aws\Sdk($this->options);
+    }
+
+    public function getS3($arg=[]){
+        return new S3Client($this->options);
     }
 }
